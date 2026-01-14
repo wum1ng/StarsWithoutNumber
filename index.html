@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarantula Nebula Sector</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0a0015 0%, #1a0520 50%, #0f0218 100%);
+            font-family: 'Courier New', monospace;
+            color: #ff6b9d;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px #ff1493, 0 0 40px #ff1493;
+            color: #ffb3d9;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #cc88aa;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+        
+        .controls {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            background: rgba(255, 20, 147, 0.3);
+            border: 1px solid #ff1493;
+            color: #ffb3d9;
+            padding: 8px 16px;
+            margin: 0 5px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            background: rgba(255, 20, 147, 0.5);
+            box-shadow: 0 0 10px rgba(255, 20, 147, 0.5);
+        }
+        
+        .btn.active {
+            background: rgba(255, 20, 147, 0.6);
+            box-shadow: 0 0 15px rgba(255, 20, 147, 0.7);
+        }
+        
+        .main-content {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+        
+        .map-section {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .map-container {
+            background-image: url('https://wum1ng.github.io/StarsWithoutNumber/tarantula%20nebula%20medium.jpg');
+            background-size: cover;
+            background-position: center;
+            background-color: rgba(10, 0, 30, 0.85);
+            background-blend-mode: multiply;
+            border: 2px solid #ff1493;
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0 0 30px rgba(255, 20, 147, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .map-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(ellipse at 30% 40%, rgba(255, 20, 147, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 60%, rgba(255, 100, 180, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .map-container::after {
+            display: none;
+        }
+        
+        svg {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .info-section {
+            width: 400px;
+            flex-shrink: 0;
+        }
+        
+        svg {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .hex {
+            fill: rgba(20, 10, 40, 0.3);
+            stroke: #4a2850;
+            stroke-width: 1;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .hex:hover {
+            fill: rgba(255, 20, 147, 0.2);
+            stroke: #ff1493;
+            stroke-width: 2;
+        }
+        
+        .hex.has-system {
+            fill: rgba(50, 20, 80, 0.5);
+        }
+        
+        .hex.has-system:hover {
+            fill: rgba(255, 20, 147, 0.3);
+        }
+        
+        .hex.selected {
+            fill: rgba(255, 20, 147, 0.4);
+            stroke: #ffb3d9;
+            stroke-width: 2.5;
+        }
+        
+        .star {
+            filter: drop-shadow(0 0 3px currentColor);
+        }
+        
+        .coord-label {
+            fill: #663366;
+            font-size: 8px;
+            font-family: 'Courier New', monospace;
+            pointer-events: none;
+        }
+        
+        .system-name {
+            fill: #ffb3d9;
+            font-size: 10px;
+            font-weight: bold;
+            pointer-events: none;
+            text-shadow: 0 0 5px rgba(255, 20, 147, 0.8);
+        }
+        
+        .world-count {
+            fill: #aa88bb;
+            font-size: 7px;
+            font-family: 'Courier New', monospace;
+            pointer-events: none;
+        }
+        
+        .mystery-indicator {
+            pointer-events: none;
+            filter: drop-shadow(0 0 3px #ff1493);
+        }
+        
+        .info-panel {
+            background: rgba(30, 10, 50, 0.8);
+            border: 1px solid #ff1493;
+            border-radius: 5px;
+            padding: 20px;
+            min-height: 100px;
+            max-height: 800px;
+            overflow-y: auto;
+        }
+        
+        .info-panel::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .info-panel::-webkit-scrollbar-track {
+            background: rgba(20, 10, 40, 0.5);
+            border-radius: 4px;
+        }
+        
+        .info-panel::-webkit-scrollbar-thumb {
+            background: #ff1493;
+            border-radius: 4px;
+        }
+        
+        .info-panel::-webkit-scrollbar-thumb:hover {
+            background: #ff69b4;
+        }
+        
+        .info-panel h3 {
+            margin-top: 0;
+            color: #ffb3d9;
+            text-shadow: 0 0 10px #ff1493;
+        }
+        
+        .info-panel p {
+            color: #dd99bb;
+            line-height: 1.6;
+        }
+        
+        .edit-form {
+            background: rgba(20, 10, 40, 0.7);
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid #ff1493;
+            border-radius: 5px;
+        }
+        
+        .edit-form input,
+        .edit-form textarea,
+        .edit-form select {
+            width: 100%;
+            background: rgba(10, 0, 30, 0.8);
+            border: 1px solid #663366;
+            color: #ffb3d9;
+            padding: 5px;
+            margin: 5px 0;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            box-sizing: border-box;
+        }
+        
+        .edit-form label {
+            color: #cc99bb;
+            font-size: 0.85em;
+            display: block;
+            margin-top: 8px;
+        }
+        
+        .edit-form textarea {
+            min-height: 60px;
+            resize: vertical;
+        }
+        
+        .edit-form button {
+            background: rgba(255, 20, 147, 0.3);
+            border: 1px solid #ff1493;
+            color: #ffb3d9;
+            padding: 6px 12px;
+            margin: 5px 5px 0 0;
+            cursor: pointer;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .edit-form button:hover {
+            background: rgba(255, 20, 147, 0.5);
+        }
+        
+        .world-edit-item {
+            background: rgba(10, 0, 30, 0.5);
+            padding: 10px;
+            margin: 8px 0;
+            border-left: 3px solid #ff1493;
+            border-radius: 3px;
+        }
+        
+        .poi-edit-item {
+            display: flex;
+            gap: 5px;
+            margin: 5px 0;
+        }
+        
+        .poi-edit-item input {
+            flex: 1;
+        }
+        
+        .poi-edit-item button {
+            width: 30px;
+            padding: 4px;
+        }
+        
+        .draggable {
+            cursor: move;
+        }
+        
+        .dragging {
+            opacity: 0.5;
+        }
+        
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            font-size: 0.85em;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .legend-star {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .star-o { background: #4da6ff; box-shadow: 0 0 8px #4da6ff; }
+        .star-b { background: #b3d9ff; box-shadow: 0 0 8px #b3d9ff; }
+        .star-a { background: #ffffff; box-shadow: 0 0 8px #ffffff; }
+        .star-g { background: #ffff99; box-shadow: 0 0 8px #ffff99; }
+        .star-k { background: #ffb366; box-shadow: 0 0 8px #ffb366; }
+        .star-m { background: #ff6666; box-shadow: 0 0 8px #ff6666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>TARANTULA NEBULA SECTOR</h1>
+        <div class="subtitle">Stars Without Number - Sector Map</div>
+        
+        <div class="controls">
+            <button class="btn active" id="viewModeBtn" onclick="setMode('view')">View Mode</button>
+            <button class="btn" id="editModeBtn" onclick="setMode('edit')">Edit System</button>
+            <button class="btn" id="moveModeBtn" onclick="setMode('move')">Move Systems</button>
+            <button class="btn" onclick="addNewSystem()">Add System</button>
+            <button class="btn" onclick="exportData()">Export Data</button>
+        </div>
+        
+        <div class="main-content">
+            <div class="map-section">
+                <div class="map-container">
+                    <svg id="hexmap" viewBox="0 0 680 820"></svg>
+                </div>
+                
+                <div class="legend">
+                    <div class="legend-item"><div class="legend-star star-o"></div><span>O-Type (Blue Giant)</span></div>
+                    <div class="legend-item"><div class="legend-star star-b"></div><span>B-Type (Blue-White)</span></div>
+                    <div class="legend-item"><div class="legend-star star-a"></div><span>A-Type (White)</span></div>
+                    <div class="legend-item"><div class="legend-star star-g"></div><span>G-Type (Yellow)</span></div>
+                    <div class="legend-item"><div class="legend-star star-k"></div><span>K-Type (Orange)</span></div>
+                    <div class="legend-item"><div class="legend-star star-m"></div><span>M-Type (Red)</span></div>
+                    <div class="legend-item"><div class="legend-star" style="background: #000; border: 1px solid #ff1493;"></div><span>Black Hole</span></div>
+                    <div class="legend-item"><div class="legend-star" style="background: #cc99ff; box-shadow: 0 0 8px #cc99ff;"></div><span>Neutron Star</span></div>
+                    <div class="legend-item"><div class="legend-star" style="background: #ff1493; box-shadow: 0 0 8px #ff1493;"></div><span>Grav. Waves</span></div>
+                    <div class="legend-item"><span style="font-size: 1.3em; color: #ff69b4;">⧗</span><span>Precursor Evidence</span></div>
+                </div>
+            </div>
+            
+            <div class="info-section">
+                <div class="info-panel" id="infoPanel">
+                    <h3>Sector Information</h3>
+                    <p>Loading sector data...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        const svg = document.getElementById('hexmap');
+        const hexRadius = 35;
+        const hexWidth = hexRadius * Math.sqrt(3);
+        const hexHeight = hexRadius * 2;
+        const cols = 10;
+        const rows = 10;
+        
+        // Calculate total grid dimensions
+        const gridWidth = (cols - 1) * hexWidth * 0.75 + hexWidth + hexRadius * 2;
+        const gridHeight = rows * hexHeight + hexHeight / 2 + hexRadius * 2;
+        
+        // Get viewBox dimensions
+        const viewBoxWidth = 680;
+        const viewBoxHeight = 820;
+        
+        // Center the grid in the viewBox
+        const startX = (viewBoxWidth - gridWidth) / 2 + hexRadius;
+        const startY = (viewBoxHeight - gridHeight) / 2 + hexRadius;
+        
+        let selectedHex = null;
+        let currentMode = 'view';
+        let selectedSystem = null;
+        let draggedSystem = null;
+
+        const starColors = {
+            'O': '#4da6ff',
+            'B': '#b3d9ff',
+            'A': '#ffffff',
+            'G': '#ffff99',
+            'K': '#ffb366',
+            'M': '#ff6666',
+            'BH': '#000000',
+            'NS': '#cc99ff',
+            'AN': '#666666',
+            'GW': '#ff1493',
+            'PR': '#ffccff'
+        };
+
+        // Systems data
+        const systems = [
+            {
+                coord: '0104', name: 'R136', type: 'O', mystery: 3, tl: 2,
+                desc: 'Super star cluster containing some of the most massive stars known. Intense radiation makes habitation nearly impossible.',
+                worlds: [
+                    {name: 'Inferno', type: 'Rocky', atmo: 'Corrosive', temp: 'Burning', bio: 'None', pop: 'Failed Colony', tl: 2, tags: ['Abandoned Colony', 'Radioactive']},
+                    {name: 'Plasma Reef', type: 'Asteroid Belt', atmo: 'None', temp: 'Extreme', bio: 'None', pop: 'Outpost', tl: 3, tags: ['Asteroid Belt', 'Badlands World']}
+                ],
+                pois: [
+                    '⧗ Ancient alien observatory with crystalline arrays pointing at NGC 2070',
+                    '⧗ Temporal distortion field protecting structure from stellar radiation',
+                    '⧗ Star charts showing nebula configuration 50,000 years in the future',
+                    'Derelict colony ship "Icarus Dream" - crew logs mention "impossible stars"'
+                ]
+            },
+            {
+                coord: '0207', name: 'Hodge 301', type: 'B', mystery: 2, tl: 3,
+                desc: 'Ancient cluster with multiple supernova remnants. Rich in heavy elements.',
+                worlds: [
+                    {name: 'Remnant', type: 'Rocky', atmo: 'Thin', temp: 'Cold', bio: 'Microbial', pop: 'Thousands', tl: 3, tags: ['Mining World', 'Heavy Metals']},
+                    {name: 'Ghost Field', type: 'Asteroid Belt', atmo: 'None', temp: 'Variable', bio: 'None', pop: 'Hundreds', tl: 4, tags: ['Asteroid Belt', 'Pretech Remnants']},
+                    {name: 'Echo Station', type: 'Space Station', atmo: 'Enclosed', temp: 'Controlled', bio: 'None', pop: 'Thousands', tl: 4, tags: ['Trade Hub', 'Neutral Ground']}
+                ],
+                pois: [
+                    '⧗ Geological strata showing planet aged 10 million years in just 100,000',
+                    'Pretech mining facility with functional AI studying chronometric anomalies',
+                    '⧗ Asteroid with half in normal time, half in accelerated decay'
+                ]
+            },
+            {
+                coord: '0305', name: 'NGC 2070', type: 'O', mystery: 5, tl: 4,
+                desc: 'Core region. CENTRAL ANOMALY ZONE - Genesis Engine active.',
+                worlds: [
+                    {name: 'Genesis Cloud', type: 'Gas Giant', atmo: 'Crushing', temp: 'Variable', bio: 'Exotic', pop: 'None', tl: 0, tags: ['Strange Life', 'Unbracketed']},
+                    {name: 'Protostar Alpha', type: 'Protoplanetary Disk', atmo: 'Toxic', temp: 'Burning', bio: 'None', pop: 'Research Station', tl: 4, tags: ['Secret Facility', 'Forbidden Tech']},
+                    {name: 'Nascent', type: 'Forming Rocky World', atmo: 'Primordial', temp: 'Hot', bio: 'Pre-life', pop: 'None', tl: 0, tags: ['Unbracketed', 'Temporal Anomaly']}
+                ],
+                pois: [
+                    '⧗ THE GENESIS ENGINE: Massive ancient structure orbiting protostar',
+                    '⧗ Gravitational waves in impossible patterns - artificial stellar nursery',
+                    '⧗ Planet "Nascent" forming in real-time - visible daily changes',
+                    '⧗ Time runs 1000x faster in localized zones around the Engine',
+                    'Corporate black ops teams fighting over Engine access'
+                ]
+            },
+            {
+                coord: '0409', name: 'Radcliffe Wave', type: 'A', mystery: 3, tl: 4,
+                desc: 'Edge of a stellar nursery. Moderate radiation, potential colony sites.',
+                worlds: [
+                    {name: 'New Haven', type: 'Terrestrial', atmo: 'Breathable', temp: 'Temperate', bio: 'Human-Compatible', pop: 'Millions', tl: 4, tags: ['Terraform', 'Colonizers']},
+                    {name: 'Meridian', type: 'Rocky', atmo: 'Thin', temp: 'Cold', bio: 'Engineered', pop: 'Hundreds of Thousands', tl: 3, tags: ['Minimal Contact', 'Religious']}
+                ],
+                pois: [
+                    '⧗ Terraforming completed in 15 years instead of projected 200',
+                    '⧗ Ancient alien terraforming equipment still active underground',
+                    'Religious cult worships "the Accelerators" - precursor gods'
+                ]
+            },
+            {
+                coord: '0502', name: 'Nebular Gate', type: 'G', mystery: 2, tl: 4,
+                desc: 'Jump gate nexus. Strategic location for sector navigation.',
+                worlds: [
+                    {name: 'Gateway Prime', type: 'Space Station', atmo: 'Enclosed', temp: 'Controlled', bio: 'None', pop: 'Tens of Thousands', tl: 4, tags: ['Trade Hub', 'Seagoing Cities']},
+                    {name: 'Sentinel', type: 'Rocky', atmo: 'Breathable', temp: 'Temperate', bio: 'Hybrid', pop: 'Thousands', tl: 4, tags: ['Preceptor Archive', 'Psionics Academy']}
+                ],
+                pois: [
+                    '⧗ Spike drive malfunctions near gravitational dead zones',
+                    '⧗ Psychics report visions of time flowing wrong',
+                    'Black market dealing in precursor temporal artifacts',
+                    'Spike drill nexus connects to 6 systems'
+                ]
+            },
+            {
+                coord: '0606', name: 'Crimson Reach', type: 'M', mystery: 1, tl: 3,
+                desc: 'Red giant system with extensive asteroid mining operations.',
+                worlds: [
+                    {name: 'Bloodstone Belt', type: 'Asteroid Belt', atmo: 'None', temp: 'Variable', bio: 'None', pop: 'Tens of Thousands', tl: 3, tags: ['Asteroid Belt', 'Freak Geology']},
+                    {name: 'Rubicon', type: 'Ice World', atmo: 'Inert', temp: 'Frozen', bio: 'None', pop: 'Thousands', tl: 3, tags: ['Minimal Contact', 'Rigid Culture']}
+                ],
+                pois: [
+                    'Megacorporation mining headquarters',
+                    '⧗ Rich deposits of exotic crystals with temporal properties',
+                    'Miners report tools aging decades overnight near asteroids'
+                ]
+            },
+            {
+                coord: '0708', name: 'Spider\'s Thread', type: 'K', mystery: 1, tl: 3,
+                desc: 'Filamentary nebula region. Navigation hazards present.',
+                worlds: [
+                    {name: 'Gossamer', type: 'Rocky', atmo: 'Breathable', temp: 'Temperate', bio: 'Microbial', pop: 'Outpost', tl: 4, tags: ['Psionics Fear', 'Theocracy']},
+                    {name: 'Silk Road Station', type: 'Space Station', atmo: 'Enclosed', temp: 'Controlled', bio: 'None', pop: 'Hundreds', tl: 3, tags: ['Trade Hub', 'Neutral Ground']}
+                ],
+                pois: [
+                    'Smuggler haven in nebula clouds',
+                    'Pirate ambush points marked on charts',
+                    'Theocracy bans discussion of precursors as heresy'
+                ]
+            },
+            {
+                coord: '0803', name: 'New Dorado', type: 'G', mystery: 1, tl: 4,
+                desc: 'Terraformed colony world. Population: 2.3 million.',
+                worlds: [
+                    {name: 'New Dorado', type: 'Terrestrial', atmo: 'Breathable', temp: 'Temperate', bio: 'Human-Compatible', pop: 'Millions', tl: 4, tags: ['Terraform', 'Badlands World']},
+                    {name: 'Prosperity', type: 'Rocky Moon', atmo: 'Breathable', temp: 'Cold', bio: 'Hybrid', pop: 'Hundreds of Thousands', tl: 4, tags: ['Civil War', 'Colonizers']},
+                    {name: 'Merchant Hub Sigma', type: 'Space Station', atmo: 'Enclosed', temp: 'Controlled', bio: 'None', pop: 'Thousands', tl: 4, tags: ['Trade Hub', 'Pilgrimage Site']}
+                ],
+                pois: [
+                    'Political tensions between moon and planet over artifact rights',
+                    '⧗ Pretech ruins in badlands emit temporal radiation',
+                    'Agricultural exports feed sector',
+                    'Underground resistance movement'
+                ]
+            },
+            {
+                coord: '0901', name: 'Supernova Prime', type: 'B', mystery: 4, tl: 4,
+                desc: 'Recent supernova remnant. Neutron star confirmed. Radiation warning.',
+                worlds: [
+                    {name: 'Cataclysm', type: 'Shattered World', atmo: 'None', temp: 'Extreme', bio: 'None', pop: 'Failed Colony', tl: 2, tags: ['Tomb World', 'Forbidden Tech']},
+                    {name: 'Phoenix Station', type: 'Deep Space Station', atmo: 'Enclosed', temp: 'Controlled', bio: 'None', pop: 'Hundreds', tl: 4, tags: ['Secret', 'Research Base']}
+                ],
+                pois: [
+                    '⧗ Supernova occurred 500 years ago - stellar remnant appears 50,000 years old',
+                    '⧗ Evidence precursors were experimenting with stellar acceleration',
+                    '⧗ Neutron star emits chronometric particles - time dilation extreme',
+                    'Phoenix Station studying if supernova can be reversed'
+                ]
+            },
+            {
+                coord: '1005', name: 'Weaver\'s Edge', type: 'K', mystery: 3, tl: 3,
+                desc: 'Frontier outpost. Mining and research station.',
+                worlds: [
+                    {name: 'Frontier', type: 'Rocky', atmo: 'Thin', temp: 'Cold', bio: 'None', pop: 'Outpost', tl: 3, tags: ['Minimal Contact', 'Out of Contact']},
+                    {name: 'The Loom', type: 'Asteroid Belt', atmo: 'None', temp: 'Cold', bio: 'None', pop: 'Hundreds', tl: 3, tags: ['Asteroid Belt', 'Xenophiles']}
+                ],
+                pois: [
+                    '⧗ Silicon-based life shows evolutionary path compressed into centuries',
+                    '⧗ Aliens possess genetic memory of the Chronarchs',
+                    'First contact protocols complicated by alien time perception',
+                    'Aliens warn humans not to wake the Sleepers in the core'
+                ]
+            },
+            {
+                coord: '0110', name: 'Stellar Forge', type: 'O', mystery: 4, tl: 4,
+                desc: 'Massive stellar winds sculpt surrounding nebula. No habitable zones.',
+                worlds: [
+                    {name: 'Anvil', type: 'Rocky', atmo: 'Corrosive', temp: 'Burning', bio: 'None', pop: 'None', tl: 0, tags: ['Unbracketed', 'Radioactive']},
+                    {name: 'Forge Station Gamma', type: 'Deep Space Station', atmo: 'Enclosed', temp: 'Controlled', bio: 'None', pop: 'Hundreds', tl: 4, tags: ['Secret', 'Occult Researchers']}
+                ],
+                pois: [
+                    '⧗ Weaponized version of Genesis Engine technology',
+                    '⧗ Can age targets by millennia in seconds - instant fossilization',
+                    'Military black ops attempting to reverse-engineer temporal weapons',
+                    'Station crew experiencing divergent timelines'
+                ]
+            },
+            {
+                coord: '0308', name: 'Tarantula Station', type: 'A', mystery: 2, tl: 4,
+                desc: 'Main sector hub. Free port. Population: 50,000.',
+                worlds: [
+                    {name: 'Tarantula Station', type: 'Massive Station', atmo: 'Enclosed', temp: 'Controlled', bio: 'None', pop: 'Tens of Thousands', tl: 4, tags: ['Trade Hub', 'Pleasure World']},
+                    {name: 'The Spinnerets', type: 'Station Ring', atmo: 'Enclosed', temp: 'Controlled', bio: 'None', pop: 'Thousands', tl: 4, tags: ['Cheap Life', 'Pilgrimage Site']},
+                    {name: 'Haven', type: 'Rocky Moon', atmo: 'Breathable', temp: 'Temperate', bio: 'Hybrid', pop: 'Hundreds of Thousands', tl: 4, tags: ['Feral World', 'Rigid Culture']}
+                ],
+                pois: [
+                    'Sector government seat - weak authority',
+                    '⧗ Major black market for temporal artifacts and Genesis Engine data',
+                    'Information brokers trading Chronarch location maps',
+                    'Underground fighting rings using time-dilated combat zones'
+                ]
+            },
+            {
+                coord: '0510', name: 'Veil Crossing', type: 'M', mystery: 2, tl: 4,
+                desc: 'Dark nebula region. Ideal for covert operations.',
+                worlds: [
+                    {name: 'Shadow', type: 'Rocky', atmo: 'Breathable', temp: 'Cold', bio: 'Engineered', pop: 'Thousands', tl: 4, tags: ['Secret', 'Psychic Assassins']},
+                    {name: 'Phantom Base', type: 'Hidden Station', atmo: 'Enclosed', temp: 'Controlled', bio: 'None', pop: 'Hundreds', tl: 4, tags: ['Mercenaries', 'Police State']}
+                ],
+                pois: [
+                    '⧗ Black ops training using captured temporal technology',
+                    'Psychic assassins can perceive multiple timelines',
+                    '⧗ Stealth ships using time dilation for FTL alternatives'
+                ]
+            },
+            {
+                coord: '0704', name: 'Aurora Cluster', type: 'B', mystery: 0, tl: 3,
+                desc: 'Young star cluster. Spectacular views of nebula.',
+                worlds: [
+                    {name: 'Prism', type: 'Gas Giant', atmo: 'Crushing', temp: 'Variable', bio: 'Exotic', pop: 'Outpost', tl: 3, tags: ['Feral World', 'Local Speciality']},
+                    {name: 'Spectrum', type: 'Ice Moon', atmo: 'Thin', temp: 'Frozen', bio: 'Microbial', pop: 'Thousands', tl: 3, tags: ['Minimal Contact', 'Artist Colony']}
+                ],
+                pois: [
+                    'Tourist destination for wealthy elites',
+                    'Inspiration for famous artists',
+                    'Luxury resort under construction'
+                ]
+            },
+            {
+                coord: '0907', name: 'Cobalt Deep', type: 'K', mystery: 3, tl: 4,
+                desc: 'Deep space research facility studying star formation.',
+                worlds: [
+                    {name: 'Observatory Prime', type: 'Deep Space Station', atmo: 'Enclosed', temp: 'Controlled', bio: 'None', pop: 'Hundreds', tl: 4, tags: ['Preceptor Archive', 'Psionics Academy']},
+                    {name: 'Echo-7', type: 'Ice Dwarf', atmo: 'None', temp: 'Frozen', bio: 'None', pop: 'Outpost', tl: 4, tags: ['Secret', 'Xenophiles']}
+                ],
+                pois: [
+                    '⧗ Scientists discovered star formation rates impossible by known physics',
+                    '⧗ Research proving Genesis Engine existence - publication suppressed',
+                    'Data proving entire nebula is artificial stellar nursery'
+                ]
+            },
+            {
+                coord: '1009', name: 'Echo Point', type: 'G', mystery: 1, tl: 3,
+                desc: 'Agricultural colony. Exports to sector stations.',
+                worlds: [
+                    {name: 'Harvest', type: 'Terrestrial', atmo: 'Breathable', temp: 'Temperate', bio: 'Engineered', pop: 'Hundreds of Thousands', tl: 3, tags: ['Agricorp', 'Primitive Aliens']},
+                    {name: 'Granary Station', type: 'Orbital Station', atmo: 'Enclosed', temp: 'Controlled', bio: 'None', pop: 'Thousands', tl: 3, tags: ['Trade Hub', 'Colonizers']}
+                ],
+                pois: [
+                    'Genetically modified crops showing accelerated evolution',
+                    '⧗ Native species evolved from simple life to sentience in 10,000 years',
+                    'Native aliens possess oral traditions about the Sky Builders'
+                ]
+            },
+            {
+                coord: '0206', name: 'The Singularity', type: 'BH', mystery: 5, tl: 4,
+                desc: 'STELLAR MASS BLACK HOLE. Massive gravitational anomaly. EXTREME HAZARD.',
+                worlds: [
+                    {name: 'Event Horizon Station', type: 'Deep Space Station', atmo: 'Enclosed', temp: 'Controlled', bio: 'None', pop: 'Hundreds', tl: 4, tags: ['Secret', 'Forbidden Tech']},
+                    {name: 'Hawking\'s Reef', type: 'Exotic Matter Cloud', atmo: 'None', temp: 'Variable', bio: 'Unknown', pop: 'None', tl: 0, tags: ['Unbracketed', 'Strange']},
+                    {name: 'Time\'s End', type: 'Relativistic Fragment', atmo: 'None', temp: 'Extreme', bio: 'None', pop: 'Failed Colony', tl: 3, tags: ['Tomb World', 'Temporal Anomaly']}
+                ],
+                pois: [
+                    '⧗ BLACK HOLE IS ARTIFICIAL - created by Chronarch technology',
+                    '⧗ Accretion disk shows impossible matter organization patterns',
+                    '⧗ Time dilation allows viewing past events in real-time from event horizon',
+                    'Station crew experiencing extreme time dilation'
+                ]
+            },
+            {
+                coord: '0601', name: 'Void\'s Maw', type: 'NS', mystery: 4, tl: 5,
+                desc: 'Pulsar neutron star with gravitational lensing effects. Navigation extremely hazardous.',
+                worlds: [
+                    {name: 'Lighthouse', type: 'Automated Beacon', atmo: 'None', temp: 'Extreme', bio: 'None', pop: 'None', tl: 5, tags: ['Ancient', 'Alien']},
+                    {name: 'The Graveyard', type: 'Ship Debris Field', atmo: 'None', temp: 'Variable', bio: 'None', pop: 'None', tl: 0, tags: ['Tomb World', 'Salvage']}
+                ],
+                pois: [
+                    '⧗ Neutron star pulses in mathematical sequence - Chronarch beacon',
+                    '⧗ Gravitational lensing allows seeing multiple timelines simultaneously',
+                    '⧗ Ancient automated lighthouse uses unknown technology - still functional',
+                    'Salvagers report encountering their own ships from the future'
+                ]
+            },
+            {
+                coord: '0405', name: 'Null Point', type: 'AN', mystery: 3, tl: 3,
+                desc: 'Gravitational dead zone - spike drives fail catastrophically.',
+                worlds: [
+                    {name: 'Drift Station', type: 'Marooned Station', atmo: 'Enclosed', temp: 'Controlled', bio: 'None', pop: 'Thousands', tl: 3, tags: ['Stranded', 'Minimal Contact']},
+                    {name: 'The Silence', type: 'Void Region', atmo: 'None', temp: 'None', bio: 'None', pop: 'None', tl: 0, tags: ['Unbracketed', 'Strange']}
+                ],
+                pois: [
+                    '⧗ Artificial gravity well created to prevent spike drive navigation',
+                    '⧗ Chronarch prison or quarantine zone - keeping something contained',
+                    'Station populated by stranded travelers from across decades',
+                    'Psychics report feeling numb - powers don\'t work here'
+                ]
+            },
+            {
+                coord: '0909', name: 'Maelstrom', type: 'GW', mystery: 4, tl: 4,
+                desc: 'Binary neutron star system creating gravitational waves. Extreme spacetime distortion.',
+                worlds: [
+                    {name: 'Tide Pool', type: 'Warped Space Station', atmo: 'Enclosed', temp: 'Variable', bio: 'None', pop: 'Hundreds', tl: 4, tags: ['Secret', 'Research Base']},
+                    {name: 'Spiral Reef', type: 'Exotic Matter Rings', atmo: 'None', temp: 'Extreme', bio: 'Strange', pop: 'None', tl: 0, tags: ['Unbracketed', 'Forbidden Tech']}
+                ],
+                pois: [
+                    '⧗ Gravitational waves are modulated - artificial signal broadcasting across sector',
+                    '⧗ Station uses wave patterns to generate power and manipulate time',
+                    '⧗ Binary system spiraling inward too fast - Chronarch acceleration',
+                    'Corporate military attempting to seize station for weapon applications'
+                ]
+            },
+            {
+                coord: '0302', name: 'Stellar Nursery IX', type: 'PR', mystery: 2, tl: 4,
+                desc: 'Dense protostellar cloud with active star formation. Multiple forming star systems.',
+                worlds: [
+                    {name: 'Cradle', type: 'Protoplanetary Disk', atmo: 'Primordial', temp: 'Variable', bio: 'Pre-life', pop: 'Research Outpost', tl: 4, tags: ['Unbracketed', 'Strange']},
+                    {name: 'Midwife Station', type: 'Research Platform', atmo: 'Enclosed', temp: 'Controlled', bio: 'None', pop: 'Hundreds', tl: 4, tags: ['Academic', 'Peaceful']}
+                ],
+                pois: [
+                    '⧗ Star formation occurring in years instead of millions of years',
+                    'Scientists debate whether nebula is entirely artificial',
+                    '⧗ Discovery of fossilized Chronarch construction equipment',
+                    'Academic station unknowingly documenting the mystery'
+                ]
+            }
+        ];
+
+        // Mode management
+        function setMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.btn').forEach(btn => btn.classList.remove('active'));
+            
+            if (mode === 'view') {
+                document.getElementById('viewModeBtn').classList.add('active');
+                if (selectedSystem) {
+                    showSystemInfo(selectedSystem);
+                } else {
+                    showDefaultInfo();
+                }
+            } else if (mode === 'edit') {
+                document.getElementById('editModeBtn').classList.add('active');
+                if (selectedSystem) {
+                    showEditForm(selectedSystem);
+                } else {
+                    showEditInstructions();
+                }
+            } else if (mode === 'move') {
+                document.getElementById('moveModeBtn').classList.add('active');
+                showMoveInstructions();
+            }
+        }
+        
+        function addNewSystem() {
+            // Find first empty hex
+            let emptyCoord = null;
+            for (let col = 0; col < cols && !emptyCoord; col++) {
+                for (let row = 0; row < rows && !emptyCoord; row++) {
+                    const coord = rowColToCoord(col, row);
+                    if (!systems.find(s => s.coord === coord)) {
+                        emptyCoord = coord;
+                    }
+                }
+            }
+            
+            if (!emptyCoord) {
+                alert('No empty hexes available!');
+                return;
+            }
+            
+            const newSystem = {
+                coord: emptyCoord,
+                name: 'New System',
+                type: 'G',
+                mystery: 0,
+                tl: 3,
+                desc: 'A newly discovered system.',
+                worlds: [
+                    {name: 'New World', type: 'Rocky', atmo: 'Thin', temp: 'Cold', bio: 'None', pop: 'None', tl: 0, tags: ['Unexplored', 'Frontier']}
+                ],
+                pois: ['Unexplored system - survey needed']
+            };
+            
+            systems.push(newSystem);
+            redrawMap();
+            setMode('edit');
+            selectedSystem = newSystem;
+            showEditForm(newSystem);
+        }
+        
+        function showDefaultInfo() {
+            const panel = document.getElementById('infoPanel');
+            panel.innerHTML = `
+                <h3>Sector Information</h3>
+                <p>The Tarantula Nebula Sector is a dense star-forming region containing massive blue giants, neutron stars, and active stellar nurseries. <strong>Click on any star system to view detailed planetary information and points of interest.</strong></p>
+                <p><strong>Notable Features:</strong> High stellar density, ionized hydrogen clouds, multiple supernova remnants, intense radiation zones, gravitational anomalies.</p>
+                <p><strong>Systems:</strong> ${systems.length} charted locations.</p>
+                <p style="border-left: 3px solid #ff6b9d; padding-left: 10px; margin-top: 15px; color: #ffb3d9;"><strong>⚠️ SECTOR ANOMALY:</strong> Multiple systems show evidence of impossible geological timescales and temporal manipulation. Systems marked with ⧗ contain precursor evidence.</p>
+                <p style="color: #cc99bb; margin-top: 15px;"><strong>Usage:</strong></p>
+                <ul style="color: #cc99bb; padding-left: 20px;">
+                    <li><strong>View Mode:</strong> Click systems to view details</li>
+                    <li><strong>Edit System:</strong> Click systems to modify all properties</li>
+                    <li><strong>Move Systems:</strong> Drag systems to new locations</li>
+                    <li><strong>Export Data:</strong> Download your sector as JSON</li>
+                </ul>
+            `;
+        }
+        
+        function showEditInstructions() {
+            const panel = document.getElementById('infoPanel');
+            panel.innerHTML = `
+                <h3>Edit System Mode</h3>
+                <p style="color: #dd99bb;">Click on any star system to edit its details.</p>
+            `;
+        }
+        
+        function showMoveInstructions() {
+            const panel = document.getElementById('infoPanel');
+            panel.innerHTML = `
+                <h3>Move Systems Mode</h3>
+                <p style="color: #dd99bb;">Click and drag stars to new locations.</p>
+            `;
+        }
+        
+        function exportData() {
+            const dataStr = JSON.stringify(systems, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'tarantula_sector_data.json';
+            link.click();
+        }
+
+        // Display functions
+        function showSystemInfo(system) {
+            const panel = document.getElementById('infoPanel');
+            selectedSystem = system;
+            
+            let worldsHTML = system.worlds.map((world, idx) => `
+                <div style="background: rgba(20, 10, 40, 0.5); padding: 12px; margin: 8px 0; border-left: 3px solid #ff1493; border-radius: 3px;">
+                    <strong style="color: #ffb3d9;">${world.name}</strong> <span style="color: #aa88bb;">(${world.type})</span><br>
+                    <span style="color: #cc99bb; font-size: 0.9em;">
+                        Atmosphere: ${world.atmo} | Temperature: ${world.temp} | Biosphere: ${world.bio}<br>
+                        Population: ${world.pop} | Tech Level: ${world.tl}<br>
+                        Tags: ${world.tags.join(', ')}
+                    </span>
+                </div>
+            `).join('');
+            
+            let poisHTML = system.pois.map((poi, idx) => {
+                const isPrecursor = poi.startsWith('⧗');
+                const style = isPrecursor ? 
+                    'color: #ff69b4; font-weight: bold;' : 
+                    'color: #dd99bb;';
+                return `<li style="${style} margin: 5px 0;">${poi}</li>`;
+            }).join('');
+            
+            panel.innerHTML = `
+                <h3>${system.name} (${system.coord}) - ${system.type}-Type Star</h3>
+                <p style="color: #dd99bb;"><strong>Description:</strong> ${system.desc}</p>
+                <p style="color: #dd99bb;"><strong>System Tech Level:</strong> ${system.tl || 3}/5</p>
+                ${system.mystery > 0 ? `<p style="color: #ff69b4;"><strong>⧗ Precursor Evidence Level:</strong> ${system.mystery}/5</p>` : ''}
+                <h4 style="color: #ffb3d9; margin-top: 15px;">Worlds:</h4>
+                ${worldsHTML}
+                <h4 style="color: #ffb3d9; margin-top: 15px;">Points of Interest:</h4>
+                <ul style="margin: 5px 0; padding-left: 20px;">${poisHTML}</ul>
+            `;
+        }
+        
+        function showEditForm(system) {
+            const panel = document.getElementById('infoPanel');
+            selectedSystem = system;
+            
+            let worldsHTML = system.worlds.map((world, idx) => `
+                <div class="world-edit-item">
+                    <strong style="color: #ffb3d9;">World ${idx + 1}</strong>
+                    <label>Name:</label>
+                    <input type="text" id="world_${idx}_name" value="${world.name}">
+                    <label>Type:</label>
+                    <input type="text" id="world_${idx}_type" value="${world.type}">
+                    <label>Atmosphere:</label>
+                    <input type="text" id="world_${idx}_atmo" value="${world.atmo}">
+                    <label>Temperature:</label>
+                    <input type="text" id="world_${idx}_temp" value="${world.temp}">
+                    <label>Biosphere:</label>
+                    <input type="text" id="world_${idx}_bio" value="${world.bio}">
+                    <label>Population:</label>
+                    <input type="text" id="world_${idx}_pop" value="${world.pop}">
+                    <label>Tech Level:</label>
+                    <input type="number" id="world_${idx}_tl" value="${world.tl}">
+                    <label>Tags (comma separated):</label>
+                    <input type="text" id="world_${idx}_tags" value="${world.tags.join(', ')}">
+                    <button onclick="deleteWorld(${idx})">Delete World</button>
+                </div>
+            `).join('');
+            
+            let poisHTML = system.pois.map((poi, idx) => `
+                <div class="poi-edit-item">
+                    <input type="text" id="poi_${idx}" value="${poi.replace(/"/g, '&quot;')}">
+                    <button onclick="deletePOI(${idx})">×</button>
+                </div>
+            `).join('');
+            
+            panel.innerHTML = `
+                <h3>Edit: ${system.name}</h3>
+                <div class="edit-form">
+                    <label>System Name:</label>
+                    <input type="text" id="editName" value="${system.name}">
+                    
+                    <label>Star Type:</label>
+                    <select id="editType">
+                        ${['O', 'B', 'A', 'G', 'K', 'M', 'BH', 'NS', 'AN', 'GW', 'PR'].map(t => 
+                            `<option value="${t}" ${system.type === t ? 'selected' : ''}>${t}</option>`
+                        ).join('')}
+                    </select>
+                    
+                    <label>Description:</label>
+                    <textarea id="editDesc">${system.desc}</textarea>
+                    
+                    <label>System Tech Level (0-5):</label>
+                    <input type="number" id="editTL" min="0" max="5" value="${system.tl || 3}">
+                    
+                    <h4 style="color: #ffb3d9; margin-top: 15px;">Worlds:</h4>
+                    ${worldsHTML}
+                    <button onclick="addWorld()">+ Add World</button>
+                    
+                    <h4 style="color: #ffb3d9; margin-top: 15px;">Points of Interest:</h4>
+                    ${poisHTML}
+                    <button onclick="addPOI()">+ Add POI</button>
+                    
+                    <div style="margin-top: 15px;">
+                        <button onclick="saveEdit()">Save Changes</button>
+                        <button onclick="deleteSystem()">Delete System</button>
+                        <button onclick="setMode('view')">Cancel</button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function saveEdit() {
+            if (!selectedSystem) return;
+            
+            selectedSystem.name = document.getElementById('editName').value;
+            selectedSystem.type = document.getElementById('editType').value;
+            selectedSystem.desc = document.getElementById('editDesc').value;
+            selectedSystem.tl = parseInt(document.getElementById('editTL').value);
+            
+            // Update worlds
+            selectedSystem.worlds = selectedSystem.worlds.map((world, idx) => {
+                return {
+                    name: document.getElementById(`world_${idx}_name`).value,
+                    type: document.getElementById(`world_${idx}_type`).value,
+                    atmo: document.getElementById(`world_${idx}_atmo`).value,
+                    temp: document.getElementById(`world_${idx}_temp`).value,
+                    bio: document.getElementById(`world_${idx}_bio`).value,
+                    pop: document.getElementById(`world_${idx}_pop`).value,
+                    tl: parseInt(document.getElementById(`world_${idx}_tl`).value),
+                    tags: document.getElementById(`world_${idx}_tags`).value.split(',').map(t => t.trim())
+                };
+            });
+            
+            // Update POIs
+            selectedSystem.pois = selectedSystem.pois.map((poi, idx) => {
+                return document.getElementById(`poi_${idx}`).value;
+            });
+            
+            redrawMap();
+            setMode('view');
+            showSystemInfo(selectedSystem);
+        }
+        
+        function deleteSystem() {
+            if (selectedSystem && confirm(`Delete ${selectedSystem.name}?`)) {
+                const idx = systems.findIndex(s => s === selectedSystem);
+                if (idx !== -1) {
+                    systems.splice(idx, 1);
+                }
+                selectedSystem = null;
+                redrawMap();
+                setMode('view');
+                showDefaultInfo();
+            }
+        }
+        
+        function deleteWorld(idx) {
+            if (selectedSystem && confirm('Delete this world?')) {
+                selectedSystem.worlds.splice(idx, 1);
+                showEditForm(selectedSystem);
+            }
+        }
+        
+        function deletePOI(idx) {
+            if (selectedSystem) {
+                selectedSystem.pois.splice(idx, 1);
+                showEditForm(selectedSystem);
+            }
+        }
+        
+        function addWorld() {
+            if (selectedSystem) {
+                selectedSystem.worlds.push({
+                    name: 'New World',
+                    type: 'Rocky',
+                    atmo: 'Thin',
+                    temp: 'Cold',
+                    bio: 'None',
+                    pop: 'None',
+                    tl: 0,
+                    tags: ['Tag1', 'Tag2']
+                });
+                showEditForm(selectedSystem);
+            }
+        }
+        
+        function addPOI() {
+            if (selectedSystem) {
+                selectedSystem.pois.push('New point of interest');
+                showEditForm(selectedSystem);
+            }
+        }
+
+        // Drawing functions
+        function createHexPath(x, y, r) {
+            const points = [];
+            for (let i = 0; i < 6; i++) {
+                const angle = (Math.PI / 3) * i - Math.PI / 6;
+                points.push([x + r * Math.cos(angle), y + r * Math.sin(angle)]);
+            }
+            return `M ${points.map(p => p.join(',')).join(' L ')} Z`;
+        }
+
+        function getHexCenter(col, row) {
+            const x = startX + col * hexWidth * 0.75;
+            const y = startY + row * hexHeight + (col % 2) * (hexHeight / 2);
+            return [x, y];
+        }
+
+        function rowColToCoord(col, row) {
+            return `${String(col + 1).padStart(2, '0')}${String(row + 1).padStart(2, '0')}`;
+        }
+        
+        function coordToRowCol(coord) {
+            const col = parseInt(coord.substring(0, 2)) - 1;
+            const row = parseInt(coord.substring(2, 4)) - 1;
+            return [col, row];
+        }
+        
+        function findNearestHex(x, y) {
+            let minDist = Infinity;
+            let nearestCol = 0;
+            let nearestRow = 0;
+            
+            for (let col = 0; col < cols; col++) {
+                for (let row = 0; row < rows; row++) {
+                    const [hx, hy] = getHexCenter(col, row);
+                    const dist = Math.sqrt((x - hx) ** 2 + (y - hy) ** 2);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        nearestCol = col;
+                        nearestRow = row;
+                    }
+                }
+            }
+            
+            return rowColToCoord(nearestCol, nearestRow);
+        }
+        
+        function makeDraggable(element, system) {
+            let isDragging = false;
+            let startX = 0;
+            let startY = 0;
+            const [origCol, origRow] = coordToRowCol(system.coord);
+            const [origCenterX, origCenterY] = getHexCenter(origCol, origRow);
+            
+            element.addEventListener('mousedown', function(e) {
+                if (currentMode !== 'move') return;
+                isDragging = true;
+                draggedSystem = system;
+                element.classList.add('dragging');
+                
+                const rect = svg.getBoundingClientRect();
+                startX = ((e.clientX - rect.left) / rect.width) * 1000;
+                startY = ((e.clientY - rect.top) / rect.height) * 800;
+                
+                e.stopPropagation();
+            });
+            
+            document.addEventListener('mousemove', function(e) {
+                if (!isDragging || currentMode !== 'move' || draggedSystem !== system) return;
+                
+                const rect = svg.getBoundingClientRect();
+                const svgX = ((e.clientX - rect.left) / rect.width) * 1000;
+                const svgY = ((e.clientY - rect.top) / rect.height) * 800;
+                
+                const deltaX = svgX - startX;
+                const deltaY = svgY - startY;
+                
+                element.setAttribute('transform', `translate(${deltaX}, ${deltaY})`);
+            });
+            
+            document.addEventListener('mouseup', function(e) {
+                if (!isDragging || draggedSystem !== system) return;
+                isDragging = false;
+                element.classList.remove('dragging');
+                
+                const rect = svg.getBoundingClientRect();
+                const svgX = ((e.clientX - rect.left) / rect.width) * 1000;
+                const svgY = ((e.clientY - rect.top) / rect.height) * 800;
+                
+                const newCoord = findNearestHex(svgX, svgY);
+                
+                const existingSystem = systems.find(s => s.coord === newCoord && s !== draggedSystem);
+                if (existingSystem) {
+                    alert(`Coordinate ${newCoord} is already occupied by ${existingSystem.name}`);
+                } else {
+                    draggedSystem.coord = newCoord;
+                }
+                
+                redrawMap();
+                draggedSystem = null;
+            });
+        }
+        
+        function redrawMap() {
+            svg.innerHTML = '';
+            drawMap();
+        }
+        
+        function drawMap() {
+            for (let col = 0; col < cols; col++) {
+                for (let row = 0; row < rows; row++) {
+                    const [x, y] = getHexCenter(col, row);
+                    const coord = rowColToCoord(col, row);
+                    const system = systems.find(s => s.coord === coord);
+                    
+                    const hex = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    hex.setAttribute('d', createHexPath(x, y, hexRadius));
+                    hex.setAttribute('class', system ? 'hex has-system' : 'hex');
+                    
+                    if (system) {
+                        hex.onclick = function() {
+                            if (currentMode === 'move') return; // Don't select in move mode
+                            
+                            if (selectedHex) selectedHex.classList.remove('selected');
+                            hex.classList.add('selected');
+                            selectedHex = hex;
+                            
+                            if (currentMode === 'view') showSystemInfo(system);
+                            else if (currentMode === 'edit') showEditForm(system);
+                        };
+                    }
+                    
+                    svg.appendChild(hex);
+                    
+                    const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    label.setAttribute('x', x);
+                    label.setAttribute('y', y + 25);
+                    label.setAttribute('class', 'coord-label');
+                    label.setAttribute('text-anchor', 'middle');
+                    label.textContent = coord;
+                    svg.appendChild(label);
+                    
+                    if (system) {
+                        // Create a group for the star system so it can be dragged
+                        const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                        group.setAttribute('class', 'draggable');
+                        
+                        // Special rendering for anomalies
+                        if (system.type === 'BH') {
+                            const horizon = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                            horizon.setAttribute('cx', x);
+                            horizon.setAttribute('cy', y - 5);
+                            horizon.setAttribute('r', 8);
+                            horizon.setAttribute('fill', 'none');
+                            horizon.setAttribute('stroke', '#ff1493');
+                            horizon.setAttribute('stroke-width', 1.5);
+                            group.appendChild(horizon);
+                            
+                            const core = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                            core.setAttribute('cx', x);
+                            core.setAttribute('cy', y - 5);
+                            core.setAttribute('r', 4);
+                            core.setAttribute('fill', '#000000');
+                            core.setAttribute('stroke', '#330033');
+                            core.setAttribute('stroke-width', 1);
+                            group.appendChild(core);
+                        } else if (system.type === 'NS') {
+                            const star = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                            star.setAttribute('cx', x);
+                            star.setAttribute('cy', y - 5);
+                            star.setAttribute('r', 5);
+                            star.setAttribute('fill', starColors[system.type]);
+                            star.setAttribute('filter', 'drop-shadow(0 0 8px #cc99ff)');
+                            group.appendChild(star);
+                        } else {
+                            const star = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                            star.setAttribute('cx', x);
+                            star.setAttribute('cy', y - 5);
+                            star.setAttribute('r', 5);
+                            star.setAttribute('fill', starColors[system.type]);
+                            star.setAttribute('class', 'star');
+                            if (system.mystery >= 3) {
+                                star.setAttribute('filter', 'drop-shadow(0 0 6px #ff1493)');
+                            }
+                            group.appendChild(star);
+                        }
+                        
+                        const name = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                        name.setAttribute('x', x);
+                        name.setAttribute('y', y + 15);
+                        name.setAttribute('class', 'system-name');
+                        name.setAttribute('text-anchor', 'middle');
+                        name.textContent = system.name;
+                        group.appendChild(name);
+                        
+                        if (system.mystery > 0) {
+                            const mysteryIcon = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                            mysteryIcon.setAttribute('x', x - 25);
+                            mysteryIcon.setAttribute('y', y - 3);
+                            mysteryIcon.setAttribute('class', 'mystery-indicator');
+                            mysteryIcon.setAttribute('text-anchor', 'middle');
+                            mysteryIcon.setAttribute('font-size', '12');
+                            mysteryIcon.setAttribute('fill', system.mystery >= 4 ? '#ff1493' : '#ff69b4');
+                            mysteryIcon.textContent = '⧗';
+                            group.appendChild(mysteryIcon);
+                        }
+                        
+                        const worldCount = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                        worldCount.setAttribute('x', x + 20);
+                        worldCount.setAttribute('y', y - 3);
+                        worldCount.setAttribute('class', 'world-count');
+                        worldCount.setAttribute('text-anchor', 'start');
+                        worldCount.textContent = `(${system.worlds.length})`;
+                        group.appendChild(worldCount);
+                        
+                        makeDraggable(group, system);
+                        svg.appendChild(group);
+                    }
+                }
+            }
+        }
+        
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            showDefaultInfo();
+            drawMap();
+        });
+    </script>
+</body>
+</html>
