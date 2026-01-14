@@ -374,14 +374,15 @@
         // Global variables
         const svg = document.getElementById('hexmap');
         const hexRadius = 35;
-        const hexWidth = hexRadius * Math.sqrt(3);
-        const hexHeight = hexRadius * 2;
+        // For flat-top hexagons
+        const hexWidth = hexRadius * 2; // Width of the flat top edge
+        const hexHeight = Math.sqrt(3) * hexRadius; // Height from center to center vertically
         const cols = 10;
         const rows = 10;
         
-        // Calculate total grid dimensions
-        const gridWidth = (cols - 1) * hexWidth * 0.75 + hexWidth + hexRadius * 2;
-        const gridHeight = rows * hexHeight + hexHeight / 2 + hexRadius * 2;
+        // Calculate total grid dimensions for flat-top
+        const gridWidth = cols * hexWidth * 0.75 + hexWidth * 0.25;
+        const gridHeight = rows * hexHeight + hexHeight / 2;
         
         // Get viewBox dimensions
         const viewBoxWidth = 680;
@@ -1011,6 +1012,7 @@
         }
 
         function getHexCenter(col, row) {
+            // Flat-top hexagon positioning with offset columns
             const x = startX + col * hexWidth * 0.75;
             const y = startY + row * hexHeight + (col % 2) * (hexHeight / 2);
             return [x, y];
@@ -1116,6 +1118,7 @@
                     
                     const hex = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                     hex.setAttribute('d', createHexPath(x, y, hexRadius));
+                    hex.setAttribute('transform', `rotate(30, ${x}, ${y})`);
                     hex.setAttribute('class', system ? 'hex has-system' : 'hex');
                     
                     if (system) {
